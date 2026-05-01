@@ -2,7 +2,7 @@
 
 A personal To-Be-Read tracker with a visual bookshelf UI. Type a book title, and it automatically pulls the cover, author, synopsis, and page count from Open Library.
 
-**Live site:** [yourusername.github.io/tbr-bookshelf](https://yourusername.github.io/tbr-bookshelf)
+**Live site:** [yourusername.github.io/tbr-bookshelf](https://austindeneroydesigns.github.io/tbr-bookshelf)
 
 ---
 
