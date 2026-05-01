@@ -5,133 +5,295 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Reading Shelf</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --wood-dark: #1a0e05;
+      --wood-mid: #2d1a0a;
+      --wood-light: #3d2410;
+      --wood-plank: #4a2e12;
+      --wood-edge: #6b3e18;
+      --wood-shine: #8B5E2A;
+      --gold: #c9a84c;
+      --gold-dim: #8a6a28;
+      --gold-bright: #f0cc70;
+      --candle: #f5c842;
+      --candle-glow: rgba(245,180,40,0.12);
+      --parchment: #f2e0c0;
+      --parchment-dim: #c8a878;
+      --ink: #1a0e05;
+      --panel-dark: #120a03;
+      --panel-mid: #1e1108;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
-      background: linear-gradient(180deg, #080502 0%, #120e05 35%, #1a1308 65%, #0f0b04 100%);
-      font-family: 'Playfair Display', Georgia, serif;
-      color: #f5e6cc;
+      background-color: var(--panel-dark);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      color: var(--parchment);
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      position: relative;
+      cursor: default;
     }
 
-    /* Ambient glow */
-    body::before {
-      content: '';
+    /* Wood panel background */
+    .room {
       position: fixed;
-      top: 25%;
-      left: 50%;
+      inset: 0;
+      z-index: 0;
+      background:
+        /* Vertical panel lines */
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px,
+          transparent 118px,
+          rgba(0,0,0,0.35) 118px,
+          rgba(0,0,0,0.35) 120px,
+          rgba(255,255,255,0.015) 120px,
+          rgba(255,255,255,0.015) 122px,
+          transparent 122px,
+          transparent 240px
+        ),
+        /* Wood grain horizontal */
+        repeating-linear-gradient(
+          180deg,
+          transparent 0px,
+          transparent 3px,
+          rgba(0,0,0,0.04) 3px,
+          rgba(0,0,0,0.04) 4px
+        ),
+        /* Base wood gradient */
+        linear-gradient(160deg, #1e1208 0%, #160e06 30%, #1a1108 60%, #120a04 100%);
+      pointer-events: none;
+    }
+
+    /* Panel molding top */
+    .room::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(180deg, #8B5E2A 0%, #4a2e12 40%, transparent 100%);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+    }
+
+    /* Candle glow — left */
+    .glow-left {
+      position: fixed;
+      top: -10%;
+      left: -5%;
+      width: 500px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(245,160,30,0.09) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+      animation: flicker 6s ease-in-out infinite;
+    }
+
+    /* Candle glow — right */
+    .glow-right {
+      position: fixed;
+      top: -10%;
+      right: -5%;
+      width: 500px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(245,160,30,0.07) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+      animation: flicker 8s ease-in-out infinite reverse;
+    }
+
+    /* Center warm glow */
+    .glow-center {
+      position: fixed;
+      top: 0; left: 50%;
       transform: translateX(-50%);
-      width: 600px;
-      height: 250px;
-      background: radial-gradient(ellipse, #8B450012 0%, transparent 70%);
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(ellipse at top, rgba(200,130,20,0.06) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
-    header {
-      text-align: center;
-      padding: 52px 24px 40px;
+    @keyframes flicker {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      25% { opacity: 0.85; transform: scale(1.02); }
+      50% { opacity: 0.95; transform: scale(0.98); }
+      75% { opacity: 0.9; transform: scale(1.01); }
+    }
+
+    /* Vignette */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* All content above background */
+    .content {
       position: relative;
       z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 56px 24px 44px;
+      position: relative;
+    }
+
+    /* Decorative top rule */
+    header::before {
+      content: '';
+      display: block;
+      width: 180px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+      margin: 0 auto 20px;
     }
 
     .eyebrow {
-      color: #6b4c2a;
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.35em;
-      margin-bottom: 14px;
-      animation: glow 4s ease-in-out infinite;
+      color: var(--gold-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.45em;
+      margin-bottom: 16px;
+      animation: glow-text 5s ease-in-out infinite;
     }
 
     h1 {
-      font-size: clamp(28px, 6vw, 52px);
+      font-family: 'Cinzel', serif;
+      font-size: clamp(26px, 5vw, 48px);
       font-weight: 700;
-      text-shadow: 0 2px 30px rgba(139,69,19,0.3);
+      color: var(--parchment);
+      letter-spacing: 0.04em;
+      text-shadow:
+        0 0 40px rgba(200,150,40,0.25),
+        0 2px 4px rgba(0,0,0,0.8);
       line-height: 1.1;
     }
 
-    .stats {
-      color: #4a3318;
-      margin-top: 12px;
-      font-family: monospace;
-      font-size: 11px;
-      letter-spacing: 0.15em;
+    .subtitle {
+      font-family: 'IM Fell English', Georgia, serif;
+      font-style: italic;
+      color: var(--gold-dim);
+      font-size: 14px;
+      margin-top: 10px;
+      letter-spacing: 0.05em;
     }
 
-    /* Add book */
+    /* Decorative divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 18px auto 0;
+      width: 280px;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim));
+    }
+    .divider-line:last-child {
+      background: linear-gradient(90deg, var(--gold-dim), transparent);
+    }
+    .divider-diamond {
+      color: var(--gold-dim);
+      font-size: 8px;
+      letter-spacing: 4px;
+    }
+
+    .stats {
+      color: var(--gold-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      margin-top: 14px;
+    }
+
+    @keyframes glow-text {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* ── ADD BOOK ── */
     .add-area {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 24px 52px;
-      gap: 8px;
-      position: relative;
-      z-index: 1;
+      padding: 0 24px 56px;
+      gap: 10px;
     }
 
     .add-row {
       display: flex;
       width: 100%;
-      max-width: 460px;
-      background: #100c06;
-      border: 1px solid #6b4c2a28;
-      border-radius: 3px;
+      max-width: 500px;
+      background: rgba(10,6,2,0.7);
+      border: 1px solid var(--gold-dim);
+      border-radius: 2px;
       overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      box-shadow:
+        0 4px 24px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,220,100,0.05),
+        0 0 0 3px rgba(0,0,0,0.3);
     }
 
     #book-input {
       flex: 1;
       background: transparent;
       border: none;
-      padding: 14px 18px;
-      color: #f5e6cc;
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 15px;
+      padding: 14px 20px;
+      color: var(--parchment);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 16px;
+      font-style: italic;
     }
     #book-input:focus { outline: none; }
-    #book-input::placeholder { color: #4a3318; }
+    #book-input::placeholder { color: var(--gold-dim); opacity: 0.5; font-style: italic; }
 
     #add-btn {
-      background: linear-gradient(135deg, #7B3F00, #5a2e00);
+      background: linear-gradient(135deg, #5a3510, #3d2008);
       border: none;
-      padding: 14px 22px;
-      color: #FDEBD0;
+      border-left: 1px solid var(--gold-dim);
+      padding: 14px 24px;
+      color: var(--gold);
       cursor: pointer;
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.15em;
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.2em;
       white-space: nowrap;
-      border-left: 1px solid #6b4c2a1a;
-      transition: filter 0.2s;
+      transition: all 0.2s;
     }
-    #add-btn:hover { filter: brightness(1.2); }
-    #add-btn:disabled { opacity: 0.4; cursor: wait; }
+    #add-btn:hover { background: linear-gradient(135deg, #6b4018, #4a2810); color: var(--gold-bright); }
+    #add-btn:disabled { opacity: 0.5; cursor: wait; }
 
     .error-msg {
       color: #c47a7a;
-      font-family: monospace;
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-align: center;
-      max-width: 460px;
+      font-family: 'IM Fell English', Georgia, serif;
+      font-style: italic;
+      font-size: 13px;
       display: none;
     }
 
-    /* Shelf area */
-    .shelf-area {
+    /* ── SHELF SECTION ── */
+    .shelf-section {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      position: relative;
-      z-index: 1;
+      padding: 0 0 0;
     }
 
     .empty-state {
@@ -139,34 +301,25 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 14px;
       padding: 60px 24px;
-      color: #3a2a12;
+      color: var(--gold-dim);
+      opacity: 0.5;
     }
+    .empty-icon { font-size: 44px; }
+    .empty-state p:first-of-type { font-family: 'IM Fell English', serif; font-style: italic; font-size: 20px; }
+    .empty-state p:last-of-type { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.2em; }
 
-    .empty-icon { font-size: 48px; opacity: 0.3; }
-
-    .empty-state p:first-of-type {
-      font-size: 18px;
-      font-style: italic;
-    }
-
-    .empty-state p:last-of-type {
-      font-family: monospace;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      opacity: 0.6;
-    }
-
+    /* Books row */
     .books-row {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-end;
-      padding: 0 28px;
-      gap: 2px;
+      padding: 0 40px;
+      gap: 1px;
     }
 
-    /* Book spines */
+    /* ── BOOK SPINE ── */
     .spine {
       align-self: flex-end;
       flex-shrink: 0;
@@ -175,177 +328,270 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 1px 2px 1px 1px;
       overflow: hidden;
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, filter 0.3s ease;
+      border-radius: 0 1px 1px 0;
+    }
+
+    .spine:hover {
+      filter: brightness(1.15);
+      transform: translateY(-6px);
     }
 
     .spine.selected {
-      transform: translateY(-16px) !important;
-      box-shadow: 3px 0 18px rgba(0,0,0,0.6), -1px 0 6px rgba(0,0,0,0.3) !important;
+      transform: translateY(-20px) !important;
+      filter: brightness(1.2);
     }
 
+    /* Spine leather texture */
     .spine-texture {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: repeating-linear-gradient(to bottom, transparent, transparent 6px, rgba(0,0,0,0.04) 6px, rgba(0,0,0,0.04) 7px);
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent,
+          transparent 4px,
+          rgba(0,0,0,0.06) 4px,
+          rgba(0,0,0,0.06) 5px
+        );
     }
 
-    .spine-top, .spine-bottom {
+    /* Gold band top */
+    .spine-band-top {
       position: absolute;
-      left: 0;
-      right: 0;
-      height: 8px;
+      top: 0; left: 0; right: 0;
+      height: 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.3);
     }
 
-    .spine-top { top: 0; }
-    .spine-bottom { bottom: 0; }
+    /* Gold band bottom */
+    .spine-band-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 10px;
+      border-top: 1px solid rgba(0,0,0,0.3);
+    }
+
+    /* Gold decorative line near top */
+    .spine-line-top {
+      position: absolute;
+      top: 14px; left: 4px; right: 4px;
+      height: 1px;
+      background: rgba(200,160,60,0.25);
+    }
+
+    .spine-line-bottom {
+      position: absolute;
+      bottom: 14px; left: 4px; right: 4px;
+      height: 1px;
+      background: rgba(200,160,60,0.25);
+    }
 
     .spine-title {
       writing-mode: vertical-rl;
       transform: rotate(180deg);
-      font-size: 10.5px;
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.7);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       padding: 2px 0;
       line-height: 1;
-    }
-
-    /* Shelf plank */
-    .shelf-plank {
-      height: 22px;
-      background: linear-gradient(180deg, #6B4423 0%, #4A2E12 45%, #2C1A08 100%);
-      border-top: 2px solid #9B6B35;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,210,130,0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .shelf-plank::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,0,0,0.05) 60px, rgba(0,0,0,0.05) 61px);
-    }
-
-    .shelf-shadow {
-      height: 40px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 100%);
-    }
-
-    /* Read list */
-    .read-list {
-      padding: 20px 32px 28px;
-      border-top: 1px solid #6b4c2a10;
-      display: none;
       position: relative;
       z-index: 1;
     }
 
-    .read-label {
-      color: #4a3318;
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      margin-bottom: 10px;
+    /* ── SHELF PLANK ── */
+    .shelf-wrap {
+      position: relative;
     }
 
-    .read-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    /* Shelf front face */
+    .shelf-front {
+      height: 28px;
+      position: relative;
+      background: linear-gradient(180deg,
+        #7a5028 0%,
+        #5c3a18 20%,
+        #4a2e12 60%,
+        #3a2208 100%
+      );
+      border-top: 2px solid #a06830;
+      box-shadow:
+        0 8px 40px rgba(0,0,0,0.8),
+        0 2px 0 rgba(255,200,100,0.08),
+        inset 0 1px 0 rgba(255,210,120,0.15),
+        inset 0 -1px 0 rgba(0,0,0,0.4);
+      overflow: hidden;
     }
+
+    /* Wood grain on shelf */
+    .shelf-front::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 30px,
+        rgba(0,0,0,0.06) 30px,
+        rgba(0,0,0,0.06) 31px
+      );
+    }
+
+    /* Shelf highlight streak */
+    .shelf-front::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,210,120,0.12) 30%, rgba(255,210,120,0.08) 70%, transparent 100%);
+    }
+
+    /* Shelf shadow underneath */
+    .shelf-shadow {
+      height: 50px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 100%);
+    }
+
+    /* Shelf side bracket effect */
+    .shelf-bracket-left,
+    .shelf-bracket-right {
+      position: absolute;
+      top: -20px;
+      width: 16px;
+      height: 50px;
+      background: linear-gradient(90deg, #3a2208, #5c3a18);
+      border-top: 1px solid #7a5028;
+    }
+    .shelf-bracket-left { left: 20px; border-radius: 2px 0 0 2px; }
+    .shelf-bracket-right { right: 20px; border-radius: 0 2px 2px 0; }
+
+    /* ── READ LIST ── */
+    .read-list {
+      padding: 24px 40px 32px;
+      border-top: 1px solid rgba(139,94,42,0.15);
+      display: none;
+    }
+
+    .read-label {
+      color: var(--gold-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      margin-bottom: 12px;
+    }
+
+    .read-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 
     .read-tag {
-      background: #12100a;
-      border: 1px solid #6b4c2a1a;
-      color: #5a3d20;
-      font-family: Georgia, serif;
-      font-size: 12px;
+      background: rgba(10,6,2,0.5);
+      border: 1px solid rgba(139,94,42,0.2);
+      color: var(--gold-dim);
+      font-family: 'IM Fell English', Georgia, serif;
       font-style: italic;
-      padding: 4px 12px;
-      border-radius: 2px;
+      font-size: 13px;
+      padding: 4px 14px;
+      border-radius: 1px;
     }
 
-    /* Modal */
+    /* ── MODAL ── */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      z-index: 200;
-      background: rgba(5,3,1,0.82);
-      backdrop-filter: blur(8px);
+      z-index: 300;
+      background: rgba(5,2,0,0.88);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      animation: fadein 0.2s ease;
+      animation: fadein 0.25s ease;
     }
-
     .modal-overlay.open { display: flex; }
 
     .modal {
       width: 100%;
-      max-width: 580px;
-      background: linear-gradient(160deg, #1c1208 0%, #251a0a 60%, #1c1208 100%);
-      border: 1px solid #6b4c2a33;
-      border-radius: 4px;
+      max-width: 600px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px,
+          transparent 59px,
+          rgba(0,0,0,0.12) 59px,
+          rgba(0,0,0,0.12) 60px
+        ),
+        linear-gradient(160deg, #1e1208 0%, #261808 50%, #1a1005 100%);
+      border: 1px solid var(--gold-dim);
+      border-radius: 2px;
       overflow: hidden;
-      box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03);
-      animation: slideup 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow:
+        0 50px 120px rgba(0,0,0,0.9),
+        0 0 0 1px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,210,100,0.08);
+      animation: slideup 0.35s cubic-bezier(0.34,1.56,0.64,1);
       max-height: 90vh;
       display: flex;
       flex-direction: column;
     }
 
-    .modal-bar { height: 4px; }
+    /* Top gold bar */
+    .modal-bar {
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-bright), var(--gold), var(--gold-dim));
+    }
 
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 24px;
-      border-bottom: 1px solid #ffffff08;
+      padding: 16px 28px;
+      border-bottom: 1px solid rgba(139,94,42,0.2);
     }
 
     .modal-label {
-      color: #6b4c2a;
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
+      color: var(--gold-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.3em;
     }
 
     .modal-close {
       background: none;
       border: none;
-      color: #6b4c2a;
+      color: var(--gold-dim);
       cursor: pointer;
       font-size: 22px;
       line-height: 1;
       transition: color 0.15s;
+      font-family: serif;
     }
-    .modal-close:hover { color: #f5e6cc; }
+    .modal-close:hover { color: var(--parchment); }
 
     .modal-body {
       display: flex;
-      gap: 24px;
-      padding: 28px;
+      gap: 28px;
+      padding: 32px 28px;
       overflow-y: auto;
       flex: 1;
     }
 
+    /* Book cover */
     .book-cover {
       flex-shrink: 0;
-      width: 130px;
-      height: 195px;
-      border-radius: 2px 6px 6px 2px;
+      width: 135px;
+      height: 200px;
+      border-radius: 1px 5px 5px 1px;
       overflow: hidden;
-      box-shadow: 6px 6px 24px rgba(0,0,0,0.6);
+      box-shadow:
+        6px 8px 28px rgba(0,0,0,0.7),
+        inset -3px 0 10px rgba(0,0,0,0.3),
+        inset 2px 0 4px rgba(255,255,255,0.05);
       position: relative;
     }
 
@@ -363,148 +609,220 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px;
+      padding: 14px;
       text-align: center;
     }
 
-    .cover-fallback span:first-child { font-size: 28px; margin-bottom: 8px; }
-    .cover-fallback .cover-title { font-size: 11px; font-weight: 700; line-height: 1.3; }
-    .cover-fallback .cover-author { font-size: 9px; font-style: italic; margin-top: 6px; opacity: 0.7; }
+    .cover-fallback span:first-child { font-size: 26px; margin-bottom: 10px; }
 
+    .cover-fallback-title {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: 0.04em;
+    }
+
+    .cover-fallback-author {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 9px;
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+
+    /* Cover decorative lines */
+    .cover-deco-top, .cover-deco-bottom {
+      position: absolute;
+      left: 10px; right: 10px;
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+    }
+    .cover-deco-top { top: 12px; }
+    .cover-deco-bottom { bottom: 12px; }
+
+    /* Book info */
     .book-info {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       min-width: 0;
     }
 
     .book-title-lg {
-      color: #f5e6cc;
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 4px;
+      color: var(--parchment);
+      font-family: 'Cinzel', serif;
+      font-size: 19px;
+      font-weight: 600;
+      line-height: 1.3;
     }
 
     .book-author-lg {
-      color: #9b7a55;
-      font-family: Georgia, serif;
-      font-size: 14px;
+      color: var(--gold-dim);
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: 15px;
       font-style: italic;
+      margin-top: -8px;
     }
 
     .tags { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .tag {
       font-size: 9px;
-      font-family: monospace;
+      font-family: 'Cinzel', serif;
       letter-spacing: 0.15em;
-      padding: 3px 10px;
-      border-radius: 2px;
+      padding: 4px 12px;
+      border-radius: 1px;
     }
 
-    .tag-genre { }
-    .tag-meta { background: #ffffff08; border: 1px solid #ffffff11; color: #7a6040; }
+    .tag-genre {
+      border: 1px solid;
+    }
+
+    .tag-meta {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(139,94,42,0.2);
+      color: var(--gold-dim);
+    }
 
     .synopsis {
-      color: #c0a070;
-      font-family: Georgia, serif;
-      font-size: 14px;
-      line-height: 1.7;
+      color: var(--parchment-dim);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    /* Decorative quote mark */
+    .synopsis::before {
+      content: '"';
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: 40px;
+      color: var(--gold-dim);
+      opacity: 0.3;
+      line-height: 0;
+      vertical-align: -16px;
+      margin-right: 4px;
     }
 
     .modal-actions {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-top: auto;
-      padding-top: 8px;
+      padding-top: 10px;
       flex-wrap: wrap;
+      border-top: 1px solid rgba(139,94,42,0.12);
     }
 
     .btn-read {
-      background: linear-gradient(135deg, #1e4d2b, #2d6b3e);
-      border: 1px solid #3a8a4a33;
-      color: #90d4a0;
-      padding: 9px 18px;
-      border-radius: 3px;
+      background: linear-gradient(135deg, #1e3d26, #2a5434);
+      border: 1px solid rgba(80,160,80,0.2);
+      color: #90c890;
+      padding: 10px 20px;
+      border-radius: 1px;
       cursor: pointer;
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.12em;
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.15em;
       transition: filter 0.15s;
     }
     .btn-read:hover { filter: brightness(1.2); }
 
     .btn-remove {
       background: transparent;
-      border: 1px solid #8a3a3a33;
-      color: #b07070;
-      padding: 9px 18px;
-      border-radius: 3px;
+      border: 1px solid rgba(160,60,60,0.2);
+      color: #a07070;
+      padding: 10px 20px;
+      border-radius: 1px;
       cursor: pointer;
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.12em;
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.15em;
       transition: filter 0.15s;
     }
     .btn-remove:hover { filter: brightness(1.2); }
 
+    /* ── ANIMATIONS ── */
     @keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
-    @keyframes slideup { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: translateY(0) } }
-    @keyframes glow { 0%,100% { opacity: 0.4 } 50% { opacity: 0.7 } }
+    @keyframes slideup { from { opacity: 0; transform: translateY(30px) } to { opacity: 1; transform: translateY(0) } }
 
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #6b4c2a44; border-radius: 2px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); opacity: 0.3; border-radius: 2px; }
   </style>
 </head>
 <body>
 
-  <header>
-    <p class="eyebrow">◆ &nbsp; T O - B E - R E A D &nbsp; ◆</p>
-    <h1>The Reading Shelf</h1>
-    <p class="stats" id="stats">0 waiting · 0 finished</p>
-  </header>
+  <!-- Background room -->
+  <div class="room"></div>
+  <div class="glow-left"></div>
+  <div class="glow-right"></div>
+  <div class="glow-center"></div>
+  <div class="vignette"></div>
 
-  <div class="add-area">
-    <div class="add-row">
-      <input id="book-input" type="text" placeholder="Enter a book title..." autocomplete="off" />
-      <button id="add-btn">+ ADD</button>
+  <div class="content">
+
+    <header>
+      <p class="eyebrow">✦ &nbsp; A Private Collection &nbsp; ✦</p>
+      <h1>The Reading Shelf</h1>
+      <p class="subtitle">Books yet to be read, waiting in their proper place</p>
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-diamond">◆ ◆ ◆</span>
+        <div class="divider-line"></div>
+      </div>
+      <p class="stats" id="stats">0 volumes waiting · 0 finished</p>
+    </header>
+
+    <div class="add-area">
+      <div class="add-row">
+        <input id="book-input" type="text" placeholder="Enter a title to add to your collection..." autocomplete="off" />
+        <button id="add-btn">ADD TO SHELF</button>
+      </div>
+      <p class="error-msg" id="error-msg"></p>
     </div>
-    <p class="error-msg" id="error-msg"></p>
-  </div>
 
-  <div class="shelf-area">
-    <div id="empty-state" class="empty-state">
-      <span class="empty-icon">📚</span>
-      <p>Your shelf is empty</p>
-      <p>ADD A BOOK ABOVE TO GET STARTED</p>
+    <div class="shelf-section">
+      <div id="empty-state" class="empty-state">
+        <span class="empty-icon">📚</span>
+        <p>The shelf stands empty</p>
+        <p>ADD A VOLUME ABOVE TO BEGIN YOUR COLLECTION</p>
+      </div>
+
+      <div id="books-row" class="books-row" style="display:none;"></div>
+
+      <div class="shelf-wrap">
+        <div class="shelf-bracket-left"></div>
+        <div class="shelf-bracket-right"></div>
+        <div class="shelf-front"></div>
+        <div class="shelf-shadow"></div>
+      </div>
     </div>
-    <div id="books-row" class="books-row" style="display:none;"></div>
-    <div class="shelf-plank"></div>
-    <div class="shelf-shadow"></div>
-  </div>
 
-  <div class="read-list" id="read-list">
-    <p class="read-label">FINISHED READS</p>
-    <div class="read-tags" id="read-tags"></div>
-  </div>
+    <div class="read-list" id="read-list">
+      <p class="read-label">✦ &nbsp; Volumes Read &nbsp; ✦</p>
+      <div class="read-tags" id="read-tags"></div>
+    </div>
+
+  </div><!-- /content -->
 
   <!-- Modal -->
   <div class="modal-overlay" id="modal-overlay">
-    <div class="modal" id="modal">
-      <div class="modal-bar" id="modal-bar"></div>
+    <div class="modal">
+      <div class="modal-bar"></div>
       <div class="modal-header">
-        <span class="modal-label">TBR SHELF</span>
+        <span class="modal-label">✦ &nbsp; CATALOGUE ENTRY &nbsp; ✦</span>
         <button class="modal-close" id="modal-close">×</button>
       </div>
       <div class="modal-body">
         <div class="book-cover" id="modal-cover">
           <img id="modal-cover-img" src="" alt="" />
           <div class="cover-fallback" id="modal-cover-fallback">
+            <div class="cover-deco-top"></div>
             <span>📖</span>
-            <span class="cover-title" id="fallback-title"></span>
-            <span class="cover-author" id="fallback-author"></span>
+            <span class="cover-fallback-title" id="fallback-title"></span>
+            <span class="cover-fallback-author" id="fallback-author"></span>
+            <div class="cover-deco-bottom"></div>
           </div>
         </div>
         <div class="book-info">
@@ -515,8 +833,8 @@
           <div class="tags" id="modal-tags"></div>
           <p class="synopsis" id="modal-synopsis"></p>
           <div class="modal-actions">
-            <button class="btn-read" id="btn-read">✓ MARK AS READ</button>
-            <button class="btn-remove" id="btn-remove">✕ REMOVE</button>
+            <button class="btn-read" id="btn-read">✓ &nbsp; MARK AS READ</button>
+            <button class="btn-remove" id="btn-remove">✕ &nbsp; REMOVE</button>
           </div>
         </div>
       </div>
@@ -525,18 +843,18 @@
 
   <script>
     const SPINE_COLORS = [
-      { spine: "#7B3F00", light: "#A0522D", text: "#FDEBD0" },
-      { spine: "#1B3A6B", light: "#2E5FA3", text: "#D6EAF8" },
-      { spine: "#2D6A4F", light: "#40916C", text: "#D8F3DC" },
-      { spine: "#6B2D3E", light: "#9B4060", text: "#FADADD" },
-      { spine: "#4A3728", light: "#6B5344", text: "#F5E6D3" },
-      { spine: "#5C3D99", light: "#7D5BBF", text: "#EDE0FF" },
-      { spine: "#7A6020", light: "#B8942E", text: "#FDF3D0" },
-      { spine: "#1A5276", light: "#2471A3", text: "#D1ECF1" },
-      { spine: "#5D4037", light: "#8D6E63", text: "#EFEBE9" },
-      { spine: "#1B5E20", light: "#2E7D32", text: "#C8E6C9" },
-      { spine: "#880E4F", light: "#C2185B", text: "#FCE4EC" },
-      { spine: "#37474F", light: "#546E7A", text: "#ECEFF1" },
+      { spine: "#5c1a1a", light: "#8B2020", text: "#f5d5c0", band: "#7a2a2a" },
+      { spine: "#1a3a5c", light: "#1e5080", text: "#c8dff0", band: "#2a4a70" },
+      { spine: "#1e4a2a", light: "#266634", text: "#c0e8c8", band: "#2a5e34" },
+      { spine: "#3a2a0a", light: "#6a4e10", text: "#f0dfa0", band: "#5a4010" },
+      { spine: "#3a1a3a", light: "#602060", text: "#e8c8f0", band: "#502050" },
+      { spine: "#1a2a4a", light: "#223a6a", text: "#c0d0f0", band: "#2a3a5a" },
+      { spine: "#4a1a10", light: "#7a2818", text: "#f0c8b8", band: "#6a2018" },
+      { spine: "#1a3a3a", light: "#1e5858", text: "#b8e8e8", band: "#1e4848" },
+      { spine: "#2a1a0a", light: "#4a3010", text: "#f0dcc0", band: "#3a2810" },
+      { spine: "#3a3a10", light: "#5a5a18", text: "#f0f0b8", band: "#484818" },
+      { spine: "#2a0a2a", light: "#501050", text: "#e8b8e8", band: "#401040" },
+      { spine: "#0a2a1a", light: "#104a30", text: "#b8e8d0", band: "#103a28" },
     ];
 
     function getColor(i) { return SPINE_COLORS[i % SPINE_COLORS.length]; }
@@ -546,19 +864,22 @@
     let selectedId = null;
 
     function load() {
-      try { books = JSON.parse(localStorage.getItem("tbr-books") || "[]"); } catch { books = []; }
-      try { readBooks = JSON.parse(localStorage.getItem("tbr-read") || "[]"); } catch { readBooks = []; }
+      try { books = JSON.parse(localStorage.getItem("tbr-books-v3") || "[]"); } catch { books = []; }
+      try { readBooks = JSON.parse(localStorage.getItem("tbr-read-v3") || "[]"); } catch { readBooks = []; }
     }
 
     function save() {
       try {
-        localStorage.setItem("tbr-books", JSON.stringify(books));
-        localStorage.setItem("tbr-read", JSON.stringify(readBooks));
+        localStorage.setItem("tbr-books-v3", JSON.stringify(books));
+        localStorage.setItem("tbr-read-v3", JSON.stringify(readBooks));
       } catch {}
     }
 
     function updateStats() {
-      document.getElementById("stats").textContent = `${books.length} waiting · ${readBooks.length} finished`;
+      const n = books.length;
+      const r = readBooks.length;
+      document.getElementById("stats").textContent =
+        `${n} volume${n !== 1 ? "s" : ""} waiting · ${r} finished`;
     }
 
     function showError(msg) {
@@ -593,7 +914,7 @@
         year: doc.first_publish_year || null,
         pages: doc.number_of_pages_median || null,
         coverId: doc.cover_i || null,
-        synopsis: synopsis || "No description available.",
+        synopsis: synopsis || "No description is recorded for this volume.",
         genre: doc.subject?.find(s => s.length < 30) || doc.subject?.[0] || "",
       };
     }
@@ -601,8 +922,8 @@
     function createSpine(book, index) {
       const color = getColor(index);
       const seed = book.title.length + index;
-      const height = 170 + (seed * 13 % 50);
-      const width = 32 + (seed * 7 % 22);
+      const height = 175 + (seed * 13 % 55);
+      const width = 30 + (seed * 7 % 26);
 
       const el = document.createElement("div");
       el.className = "spine";
@@ -610,31 +931,42 @@
       el.title = `${book.title}${book.author ? " — " + book.author : ""}`;
       el.style.cssText = `
         width:${width}px; height:${height}px;
-        background: linear-gradient(105deg, ${color.light}22 0%, ${color.spine} 15%, ${color.spine} 85%, #00000044 100%);
-        border-left: 2px solid ${color.light}55;
-        border-right: 3px solid #00000055;
-        border-top: 2px solid ${color.light}44;
-        box-shadow: 2px 0 8px rgba(0,0,0,0.4);
+        background: linear-gradient(105deg,
+          ${color.light}33 0%,
+          ${color.spine} 12%,
+          ${color.spine} 88%,
+          rgba(0,0,0,0.5) 100%
+        );
+        border-left: 2px solid ${color.light}44;
+        border-right: 3px solid rgba(0,0,0,0.6);
+        border-top: 1px solid ${color.light}33;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.5), inset 1px 0 0 ${color.light}22;
       `;
 
       const texture = document.createElement("div");
       texture.className = "spine-texture";
 
-      const top = document.createElement("div");
-      top.className = "spine-top";
-      top.style.background = `${color.light}55`;
+      const bandTop = document.createElement("div");
+      bandTop.className = "spine-band-top";
+      bandTop.style.background = `linear-gradient(180deg, ${color.band}cc, ${color.spine})`;
 
-      const bottom = document.createElement("div");
-      bottom.className = "spine-bottom";
-      bottom.style.background = `${color.light}44`;
+      const bandBottom = document.createElement("div");
+      bandBottom.className = "spine-band-bottom";
+      bandBottom.style.background = `linear-gradient(0deg, ${color.band}cc, ${color.spine})`;
+
+      const lineTop = document.createElement("div");
+      lineTop.className = "spine-line-top";
+
+      const lineBottom = document.createElement("div");
+      lineBottom.className = "spine-line-bottom";
 
       const titleEl = document.createElement("span");
       titleEl.className = "spine-title";
       titleEl.style.color = color.text;
-      titleEl.style.maxWidth = `${height - 24}px`;
+      titleEl.style.maxWidth = `${height - 28}px`;
       titleEl.textContent = book.title;
 
-      el.append(texture, top, bottom, titleEl);
+      el.append(texture, bandTop, bandBottom, lineTop, lineBottom, titleEl);
       el.addEventListener("click", () => openModal(book.id));
       return el;
     }
@@ -666,7 +998,7 @@
       readBooks.forEach(b => {
         const tag = document.createElement("span");
         tag.className = "read-tag";
-        tag.textContent = `✓ ${b.title}`;
+        tag.textContent = `✦ ${b.title}`;
         tags.appendChild(tag);
       });
     }
@@ -675,7 +1007,6 @@
       if (selectedId === id) { closeModal(); return; }
       selectedId = id;
 
-      // Update spine selected state
       document.querySelectorAll(".spine").forEach(s => s.classList.remove("selected"));
       const spineEl = document.querySelector(`.spine[data-id="${id}"]`);
       if (spineEl) spineEl.classList.add("selected");
@@ -685,20 +1016,17 @@
       const index = books.indexOf(book);
       const color = getColor(index);
 
-      // Populate modal
-      document.getElementById("modal-bar").style.background = `linear-gradient(90deg, ${color.spine}, ${color.light}, ${color.spine})`;
       document.getElementById("modal-title").textContent = book.title;
       document.getElementById("modal-author").textContent = book.author ? `by ${book.author}` : "";
       document.getElementById("modal-synopsis").textContent = book.synopsis || "";
 
-      // Cover
       const img = document.getElementById("modal-cover-img");
       const fallback = document.getElementById("modal-cover-fallback");
       document.getElementById("fallback-title").textContent = book.title;
-      document.getElementById("fallback-author").textContent = book.author;
+      document.getElementById("fallback-author").textContent = book.author || "";
       fallback.style.background = `linear-gradient(145deg, ${color.light}, ${color.spine})`;
-      fallback.querySelector(".cover-title").style.color = color.text;
-      fallback.querySelector(".cover-author").style.color = color.text;
+      fallback.querySelector(".cover-fallback-title").style.color = color.text;
+      fallback.querySelector(".cover-fallback-author").style.color = color.text;
 
       if (book.coverId) {
         img.src = `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`;
@@ -710,24 +1038,24 @@
         fallback.style.display = "flex";
       }
 
-      // Tags
       const tagsEl = document.getElementById("modal-tags");
       tagsEl.innerHTML = "";
+
       if (book.genre) {
         const g = document.createElement("span");
         g.className = "tag tag-genre";
-        g.style.cssText = `background:${color.spine}55; border:1px solid ${color.light}44; color:${color.text};`;
-        g.textContent = book.genre.toUpperCase().slice(0, 30);
+        g.style.cssText = `background:${color.spine}66; border-color:${color.light}55; color:${color.text};`;
+        g.textContent = book.genre.toUpperCase().slice(0, 28);
         tagsEl.appendChild(g);
       }
-      [book.pages && `${book.pages} PGS`, book.year && `${book.year}`].filter(Boolean).forEach(t => {
+
+      [book.pages && `${book.pages} pages`, book.year && `${book.year}`].filter(Boolean).forEach(t => {
         const s = document.createElement("span");
         s.className = "tag tag-meta";
         s.textContent = t;
         tagsEl.appendChild(s);
       });
 
-      // Action buttons
       document.getElementById("btn-read").onclick = () => markRead(id);
       document.getElementById("btn-remove").onclick = () => removeBook(id);
 
@@ -758,12 +1086,13 @@
       const btn = document.getElementById("add-btn");
       const title = input.value.trim();
       if (!title) return;
+
       if (books.find(b => b.title.toLowerCase() === title.toLowerCase())) {
-        showError("Already on your shelf!"); return;
+        showError("This volume already rests upon your shelf."); return;
       }
 
       btn.disabled = true;
-      btn.textContent = "LOOKING UP...";
+      btn.textContent = "CONSULTING THE CATALOGUE...";
       showError("");
 
       try {
@@ -771,23 +1100,25 @@
         books = [...books, book];
         save(); input.value = ""; renderShelf();
       } catch {
-        books = [...books, { id: Date.now(), title, author: "", genre: "", synopsis: "Could not find this book in Open Library.", pages: null, coverId: null, year: null }];
+        books = [...books, {
+          id: Date.now(), title, author: "", genre: "",
+          synopsis: "No record of this volume was found in the catalogue.",
+          pages: null, coverId: null, year: null
+        }];
         save(); input.value = ""; renderShelf();
-        showError(`"${title}" not found in the database — added with no details.`);
+        showError(`"${title}" was not found in the catalogue — added without details.`);
       }
 
       btn.disabled = false;
-      btn.textContent = "+ ADD";
+      btn.textContent = "ADD TO SHELF";
     }
 
-    // Event listeners
     document.getElementById("add-btn").addEventListener("click", addBook);
     document.getElementById("book-input").addEventListener("keydown", e => { if (e.key === "Enter") addBook(); });
     document.getElementById("modal-close").addEventListener("click", closeModal);
     document.getElementById("modal-overlay").addEventListener("click", e => { if (e.target === document.getElementById("modal-overlay")) closeModal(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-    // Init
     load();
     renderShelf();
   </script>
